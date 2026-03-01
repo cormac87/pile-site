@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blue Page</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Metrophobic Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Metrophobic&display=swap" rel="stylesheet">
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Metrophobic', sans-serif;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    body::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<script>
+  window.addEventListener("load", () => {
+
+    document.getElementById("pileVideo").animate(
+      [
+        { transform: "translateX(120%) scale(1.25)", opacity: 0 },
+        { transform: "translateX(0) scale(1.25)", opacity: 1 }
+      ],
+      {
+        duration: 1400,
+        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+        fill: "forwards"
+      }
+    )
+
+    document.getElementById("heading").animate(
+      [
+        { transform: "translateY(40px)", opacity: 0 },
+        { transform: "translateY(0)", opacity: 1 }
+      ],
+      {
+        duration: 900,
+        delay: 600,
+        easing: "ease-out",
+        fill: "forwards"
+      }
+    )
+
+    document.getElementById("subtext").animate(
+      [
+        { opacity: 0 },
+        { opacity: 1 }
+      ],
+      {
+        duration: 900,
+        delay: 1100,
+        easing: "ease-out",
+        fill: "forwards"
+      }
+    )
+
+  })
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const modalRoot = document.getElementById('caseModalRoot');
+  const backdrop = document.getElementById('caseModalBackdrop');
+  const panel = document.getElementById('caseModalPanel');
+  const closeBtn = document.getElementById('caseModalClose');
+
+  const modalCategory = document.getElementById('caseModalCategory');
+  const modalTitle = document.getElementById('caseModalTitle');
+  const modalImageWrap = document.getElementById('caseModalImageWrap');
+  const modalBody = document.getElementById('caseModalBody');
+
+  let isOpen = false;
+  let lastActiveCard = null;
+
+  if (!backdrop || !panel) {
+    console.error('Case study modal elements missing from DOM');
+    return;
+  }
+
+  function openModalFromCard(card) {
+    if (isOpen) return;
+    isOpen = true;
+    lastActiveCard = card;
+
+    const category = card.dataset.category || '';
+    const title = card.dataset.title || '';
+    const imgSrc = card.dataset.image || '';
+    const body = card.dataset.body || '';
+
+    modalCategory.textContent = category;
+    modalTitle.textContent = title;
+
+    modalImageWrap.innerHTML = `
+      <img src="${imgSrc}" class="w-full h-full object-cover" />
+    `;
+
+    modalBody.textContent = body;
+
+    modalRoot.classList.remove('hidden');
+    void modalRoot.offsetHeight;
+
+    backdrop.classList.add('opacity-100');
+    panel.classList.add('opacity-100', 'scale-100');
+
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    if (!isOpen) return;
+    isOpen = false;
+
+    backdrop.classList.remove('opacity-100');
+    panel.classList.remove('opacity-100', 'scale-100');
+
+    setTimeout(() => {
+      modalRoot.classList.add('hidden');
+      document.body.style.overflow = '';
+      lastActiveCard?.focus();
+    }, 300);
+  }
+
+  document.querySelectorAll('.case-card').forEach(card => {
+    card.addEventListener('click', () => openModalFromCard(card));
+  });
+
+  backdrop.addEventListener('click', closeModal);
+  closeBtn.addEventListener('click', closeModal);
+
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+});
+</script>
+
+<body class="overflow-x-hidden bg-[#1a1a1a] text-white">
+
+  <!-- Top Navigation -->
+  <nav class="fixed top-0 left-0 w-full z-50 flex justify-center">
+    <div class="flex gap-10 text-sm tracking-widest pt-5">
+      <a href="#case" class="hover:opacity-60 transition">CASE STUDIES</a>
+      <a href="#about" class="hover:opacity-60 transition">ABOUT</a>
+      <a href="#contact" class="hover:opacity-60 transition">CONTACT</a>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+<section
+  class="relative w-screen h-screen overflow-hidden"
+  style="
+    filter: contrast(1.1) saturate(1.5);
+    background: radial-gradient(circle at 75% 50%, #3A3A3A 0%, #0F0F0F 99%);
+  "
+>
+
+  <!-- VIDEO -->
+  <video
+    id="pileVideo"
+    class="absolute right-[20%] pt-[3vh] scale-125 origin-top"
+    style="opacity: 0; transform: translateX(120%) scale(1.25);"
+    autoplay
+    muted
+    playsinline
+  >
+    <source src="pile-vid-2.webm" type="video/webm">
+  </video>
+
+  <!-- TEXT -->
+  <div class="absolute left-20 bottom-24">
+    <p
+      id="heading"
+      class="text-[40px] max-w-[220px] leading-tight"
+      style="opacity: 0; transform: translateY(40px);"
+    >
+      London Screw Piling
+    </p>
+
+    <p
+      id="subtext"
+      class="pt-12 text-base"
+      style="opacity: 0;"
+    >
+      20 years experience installing screw piles
+    </p>
+  </div>
+
+</section>
+
+
+<!-- CASE STUDIES SECTION -->
+<section id="case" class="w-screen h-screen flex items-center justify-center px-12">
+
+  <div class="w-full max-w-[1600px] h-[85vh] grid grid-cols-3 grid-rows-2 gap-10">
+
+    <!-- Card 1 -->
+    <div class="group cursor-pointer flex flex-col case-card"
+         data-category="RESIDENTIAL"
+         data-title="Foundations for House Extensions"
+         data-image="images/garden-building.jpg"
+         data-body="Short description goes here. Add your real case study text.">
+      <div class="flex-1 overflow-hidden bg-[#1a1a1a] case-media">
+        <img src="images/garden-building.jpg"
+             class="w-full h-full object-cover transition duration-700 group-hover:scale-105 case-img"/>
+      </div>
+      <div class="pt-5 case-meta">
+        <p class="tracking-widest text-xs text-gray-400 case-cat">RESIDENTIAL</p>
+        <p class="text-lg mt-1 case-title">Foundations for House Extensions</p>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="group cursor-pointer flex flex-col case-card"
+         data-category="RESTRICTED ACCESS"
+         data-title="Handheld Foundations"
+         data-image="images/restricted-access-2.jpg"
+         data-body="Short description goes here. Add your real case study text.">
+      <div class="flex-1 overflow-hidden bg-[#1a1a1a] case-media">
+        <img src="images/restricted-access-2.jpg"
+             class="w-full h-full object-cover transition duration-700 group-hover:scale-105 case-img"/>
+      </div>
+      <div class="pt-5 case-meta">
+        <p class="tracking-widest text-xs text-gray-400 case-cat">RESTRICTED ACCESS</p>
+        <p class="text-lg mt-1 case-title">Handheld Foundations</p>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="group cursor-pointer flex flex-col case-card"
+         data-category="UNDERPINNING"
+         data-title="Subsidence Repairs"
+         data-image="images/underpinning.jpg"
+         data-body="Short description goes here. Add your real case study text.">
+      <div class="flex-1 overflow-hidden bg-[#1a1a1a] case-media">
+        <img src="images/underpinning.jpg"
+             class="w-full h-full object-cover transition duration-700 group-hover:scale-105 case-img"/>
+      </div>
+      <div class="pt-5 case-meta">
+        <p class="tracking-widest text-xs text-gray-400 case-cat">UNDERPINNING</p>
+        <p class="text-lg mt-1 case-title">Subsidence Repairs</p>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="group cursor-pointer flex flex-col case-card"
+         data-category="HOUSING"
+         data-title="New Build Foundations"
+         data-image="images/new-build.jpg"
+         data-body="Short description goes here. Add your real case study text.">
+      <div class="flex-1 overflow-hidden bg-[#1a1a1a] case-media">
+        <img src="images/new-build.jpg"
+             class="w-full h-full object-cover transition duration-700 group-hover:scale-105 case-img"/>
+      </div>
+      <div class="pt-5 case-meta">
+        <p class="tracking-widest text-xs text-gray-400 case-cat">HOUSING</p>
+        <p class="text-lg mt-1 case-title">New Build Foundations</p>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="group cursor-pointer flex flex-col case-card"
+         data-category="COMMERCIAL"
+         data-title="Utilities Foundations"
+         data-image="images/utilities.jpg"
+         data-body="Short description goes here. Add your real case study text.">
+      <div class="flex-1 overflow-hidden bg-[#1a1a1a] case-media">
+        <img src="images/utilities.jpg"
+             class="w-full h-full object-cover transition duration-700 group-hover:scale-105 case-img"/>
+      </div>
+      <div class="pt-5 case-meta">
+        <p class="tracking-widest text-xs text-gray-400 case-cat">COMMERCIAL</p>
+        <p class="text-lg mt-1 case-title">Utilities Foundations</p>
+      </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="group cursor-pointer flex flex-col case-card"
+         data-category="ECOLOGICAL"
+         data-title="Non-Invasive Tree Safe Foundations"
+         data-image="images/tree-safe.jpg"
+         data-body="London Screw Piling provides efficient foundation solutions for house extensions using helical screw piles.
+
+Unlike traditional concrete footings, screw piles require minimal excavation and can be installed quickly with little disruption to the home or garden. Once installed, they are typically load-bearing immediately, helping projects progress without delays.
+
+The system is suitable for a wide range of ground conditions and works well on residential sites with limited space, existing patios, or nearby services. London Screw Piling works closely with structural engineers to ensure foundations meet Building Control requirements and provide a reliable base for single- or multi-storey extensions."
+      >
+      <div class="flex-1 overflow-hidden bg-[#1a1a1a] case-media">
+        <img src="images/tree-safe.jpg"
+             class="w-full h-full object-cover transition duration-700 group-hover:scale-105 case-img"/>
+      </div>
+      <div class="pt-5 case-meta">
+        <p class="tracking-widest text-xs text-gray-400 case-cat">ECOLOGICAL</p>
+        <p class="text-lg mt-1 case-title">Tree Safe Foundations</p>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- Modal root (add once, after your section) -->
+<div id="caseModalRoot" class="fixed inset-0 z-[999] hidden">
+  <!-- Backdrop -->
+  <div id="caseModalBackdrop"
+       class="absolute inset-0 bg-black/50 backdrop-blur-md opacity-0 transition-opacity duration-300"></div>
+
+  <!-- Modal panel -->
+  <div class="absolute inset-0 flex items-center justify-center px-6">
+    <div id="caseModalPanel"
+         class="w-full max-w-[1100px] max-h-[80vh] overflow-hidden rounded-2xl border border-white/10
+                bg-white/10 backdrop-blur-xl shadow-2xl
+                scale-95 opacity-0 transition duration-300">
+      <!-- Header -->
+      <div class="px-8 pt-8">
+        <p id="caseModalCategory" class="tracking-widest text-xs text-gray-200/80"></p>
+        <h3 id="caseModalTitle" class="mt-2 text-3xl md:text-4xl font-semibold text-white"></h3>
+      </div>
+
+      <!-- Content -->
+      <div class="px-8 pb-8 pt-6 overflow-auto max-h-[70vh]">
+        <div class="relative">
+          <!-- Image goes top-right -->
+          <div id="caseModalImageWrap"
+               class="float-none md:float-right md:ml-8 mb-6 md:mb-4
+                      w-full md:w-[420px] aspect-[4/3] overflow-hidden rounded-xl bg-black/20">
+            <!-- We'll inject the real <img> here -->
+          </div>
+
+          <!-- Text flows around it -->
+          <div id="caseModalBody" class="text-gray-100/90 leading-relaxed whitespace-pre-line">
+            <!-- injected -->
+          </div>
+
+          <div class="clear-both"></div>
+        </div>
+
+        <button id="caseModalClose"
+                class="mt-8 inline-flex items-center justify-center rounded-full
+                       border border-white/15 bg-white/10 px-5 py-2 text-sm text-white
+                       hover:bg-white/15 transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ABOUT SECTION -->
+  <section id="about" class="w-screen h-screen flex items-center justify-center px-8">
+
+    <div class="max-w-3xl text-center space-y-8">
+      <h2 class="text-4xl tracking-wide">About Us</h2>
+      <p class="text-gray-400 leading-relaxed">
+        We specialise in high performance screw piling solutions across London and surrounding areas. With over 20 years of industry experience, we deliver structural reliability, fast installation and minimal ground disturbance for residential and commercial projects.
+      </p>
+      <p class="text-gray-400 leading-relaxed">
+        Our team works closely with architects, engineers and contractors to ensure every foundation system is installed to the highest structural and safety standards.
+      </p>
+    </div>
+
+  </section>
+
+  <!-- CONTACT SECTION -->
+  <section id="contact" class="w-screen h-screen flex items-center justify-center px-8">
+
+    <div class="max-w-xl w-full text-center space-y-10">
+      <h2 class="text-4xl tracking-wide">Contact</h2>
+
+      <div class="space-y-4 text-gray-400">
+        <p>info@londonscrewpiling.co.uk</p>
+        <p>020 0000 0000</p>
+        <p>London, United Kingdom</p>
+      </div>
+
+      <div class="flex flex-col gap-4 pt-6">
+        <input type="text" placeholder="Name" class="bg-black p-4 outline-none">
+        <input type="email" placeholder="Email" class="bg-black p-4 outline-none">
+        <textarea placeholder="Message" rows="4" class="bg-black p-4 outline-none"></textarea>
+        <button class="border border-white py-4 hover:bg-white hover:text-black transition">Send Message</button>
+      </div>
+    </div>
+
+  </section>
+
+</body>
+
+<style>
+  /* A "ghost" element that animates from card to modal */
+  .case-ghost {
+    position: fixed;
+    z-index: 1000;
+    will-change: transform, width, height;
+    transform-origin: top left;
+    pointer-events: none;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .case-ghost img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .case-ghost-meta {
+    position: fixed;
+    z-index: 1001;
+    will-change: transform, width;
+    transform-origin: top left;
+    pointer-events: none;
+  }
+</style>
+</html>
+
+

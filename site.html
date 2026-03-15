@@ -75,7 +75,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   const modalRoot = document.getElementById('caseModalRoot');
-  const backdrop = document.getElementById('caseModalBackdrop');
   const panel = document.getElementById('caseModalPanel');
   const closeBtn = document.getElementById('caseModalClose');
 
@@ -83,19 +82,59 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalTitle = document.getElementById('caseModalTitle');
   const modalImageWrap = document.getElementById('caseModalImageWrap');
   const modalBody = document.getElementById('caseModalBody');
+  const cards = Array.from(document.querySelectorAll('.case-card'));
 
   let isOpen = false;
   let lastActiveCard = null;
+  let activeSlug = null;
 
-  if (!backdrop || !panel) {
+  if (!modalRoot || !panel) {
     console.error('Case study modal elements missing from DOM');
     return;
   }
 
-  function openModalFromCard(card) {
-    if (isOpen) return;
+  function slugify(value) {
+    return value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function getCardSlug(card) {
+    if (!card.dataset.slug) {
+      card.dataset.slug = slugify(card.dataset.title || '');
+    }
+    return card.dataset.slug;
+  }
+
+  function getModalSlugFromUrl() {
+    return new URL(window.location.href).searchParams.get('case');
+  }
+
+  function getModalUrl(slug) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('case', slug);
+    return url;
+  }
+
+  function getBaseUrl() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('case');
+    return url;
+  }
+
+  function getCardBySlug(slug) {
+    return cards.find(card => getCardSlug(card) === slug) || null;
+  }
+
+  function openModalFromCard(card, { pushState = true } = {}) {
+    const slug = getCardSlug(card);
+
+    if (isOpen && activeSlug === slug) return;
     isOpen = true;
     lastActiveCard = card;
+    activeSlug = slug;
 
     const category = card.dataset.category || '';
     const title = card.dataset.title || '';
@@ -114,17 +153,22 @@ document.addEventListener('DOMContentLoaded', () => {
     modalRoot.classList.remove('hidden');
     void modalRoot.offsetHeight;
 
-    backdrop.classList.add('opacity-100');
+    modalRoot.querySelector('#caseModalBackdrop').classList.add('opacity-100');
     panel.classList.add('opacity-100', 'scale-100');
 
     document.body.style.overflow = 'hidden';
+
+    if (pushState) {
+      window.history.pushState({ caseModal: slug }, '', getModalUrl(slug));
+    }
   }
 
-  function closeModal() {
+  function hideModal() {
     if (!isOpen) return;
     isOpen = false;
+    activeSlug = null;
 
-    backdrop.classList.remove('opacity-100');
+    modalRoot.querySelector('#caseModalBackdrop').classList.remove('opacity-100');
     panel.classList.remove('opacity-100', 'scale-100');
 
     setTimeout(() => {
@@ -134,17 +178,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 300);
   }
 
-  document.querySelectorAll('.case-card').forEach(card => {
+  function closeModal({ updateHistory = true } = {}) {
+    if (!isOpen) return;
+
+    if (updateHistory && window.history.state?.caseModal === activeSlug) {
+      window.history.back();
+      return;
+    }
+
+    if (updateHistory && getModalSlugFromUrl() === activeSlug) {
+      window.history.replaceState(window.history.state, '', getBaseUrl());
+    }
+
+    hideModal();
+  }
+
+  function syncModalToUrl() {
+    const slug = getModalSlugFromUrl();
+    const card = slug ? getCardBySlug(slug) : null;
+
+    if (card) {
+      openModalFromCard(card, { pushState: false });
+      return;
+    }
+
+    hideModal();
+  }
+
+  cards.forEach(card => {
+    getCardSlug(card);
     card.addEventListener('click', () => openModalFromCard(card));
   });
 
-  backdrop.addEventListener('click', closeModal);
-  closeBtn.addEventListener('click', closeModal);
+  modalRoot.addEventListener('click', event => {
+    if (!panel.contains(event.target)) {
+      closeModal();
+    }
+  });
+
+  closeBtn.addEventListener('click', () => closeModal());
 
   window.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeModal();
   });
 
+  window.addEventListener('popstate', syncModalToUrl);
+
+  syncModalToUrl();
 });
 </script>
 
@@ -321,7 +401,7 @@ The system is suitable for a wide range of ground conditions and works well on r
   <!-- Modal panel -->
   <div class="absolute inset-0 flex items-center justify-center px-6">
     <div id="caseModalPanel"
-         class="w-full max-w-[1100px] max-h-[80vh] overflow-hidden rounded-2xl border border-white/10
+         class="w-full max-w-[1100px] max-h-[80vh] overflow-hidden border border-white/10
                 bg-white/10 backdrop-blur-xl shadow-2xl
                 scale-95 opacity-0 transition duration-300">
       <!-- Header -->
@@ -336,7 +416,7 @@ The system is suitable for a wide range of ground conditions and works well on r
           <!-- Image goes top-right -->
           <div id="caseModalImageWrap"
                class="float-none md:float-right md:ml-8 mb-6 md:mb-4
-                      w-full md:w-[420px] aspect-[4/3] overflow-hidden rounded-xl bg-black/20">
+                      w-full md:w-[420px] aspect-[4/3] overflow-hidden bg-black/20">
             <!-- We'll inject the real <img> here -->
           </div>
 
